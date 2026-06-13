@@ -3,6 +3,7 @@
 # Usage: kratos {start|stop|status|shell|reset}
 set -e
 SCRIPT_PATH="$(realpath "$0")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
 ORIG_ARGS="$*"
 
 # ── Config ──────────────────────────────────────────────────────────
@@ -19,7 +20,7 @@ BLUE='\033[0;34m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-info()  { echo -e "${BLUE}[kratos]${NC} $1"; }
+info()  { echo -e "${BLUE}[kratos-dev]${NC} $1"; }
 ok()    { echo -e "${GREEN}[  OK  ]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[ WARN ]${NC} $1"; }
 fail()  { echo -e "${RED}[ FAIL ]${NC} $1" >&2; exit 1; }
@@ -105,6 +106,7 @@ cmd_start() {
             -p 127.0.0.1:6080:6080 \
             -p 127.0.0.1:9090:9090 \
             -v "$WS":/workspace \
+            -v "$SCRIPT_DIR/entrypoint.sh":/entrypoint.sh:ro \
             "$IMAGE" 2>&1)
         if [ $? -ne 0 ]; then
             fail "Failed to start container:\n       $RUN_OUTPUT"
@@ -120,14 +122,14 @@ cmd_start() {
 
     ok "Container started"
     echo ""
-    echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}${BOLD}║       Kratos Dev Environment Started         ║${NC}"
-    echo -e "${GREEN}${BOLD}╠══════════════════════════════════════════════╣${NC}"
-    echo -e "${GREEN}${BOLD}║${NC}  Desktop:   ${BOLD}http://localhost:6080/vnc.html${NC}   ${GREEN}${BOLD}║${NC}"
-    echo -e "${GREEN}${BOLD}║${NC}  Rosbridge: ${BOLD}ws://localhost:9090${NC}             ${GREEN}${BOLD}║${NC}"
-    echo -e "${GREEN}${BOLD}║${NC}  Shell:     ${BOLD}./kratos shell${NC}                  ${GREEN}${BOLD}║${NC}"
-    echo -e "${GREEN}${BOLD}║${NC}  Stop:      ${BOLD}./kratos stop${NC}                   ${GREEN}${BOLD}║${NC}"
-    echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════╝${NC}"
+    echo -e "${GREEN}${BOLD}╔════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}${BOLD}║         Kratos Dev Environment Started         ║${NC}"
+    echo -e "${GREEN}${BOLD}╠════════════════════════════════════════════════╣${NC}"
+    echo -e "${GREEN}${BOLD}║${NC}  Desktop:   ${BOLD}http://localhost:6080/vnc.html${NC}     ${GREEN}${BOLD}║${NC}"
+    echo -e "${GREEN}${BOLD}║${NC}  Rosbridge: ${BOLD}ws://localhost:9090${NC}                ${GREEN}${BOLD}║${NC}"
+    echo -e "${GREEN}${BOLD}║${NC}  Shell:     ${BOLD}./kratos shell${NC}                     ${GREEN}${BOLD}║${NC}"
+    echo -e "${GREEN}${BOLD}║${NC}  Stop:      ${BOLD}./kratos stop${NC}                      ${GREEN}${BOLD}║${NC}"
+    echo -e "${GREEN}${BOLD}╚════════════════════════════════════════════════╝${NC}"
     echo ""
 
     # macOS: activate Genesis venv + set ROS_DOMAIN_ID for cross-host comms
@@ -138,8 +140,8 @@ cmd_start() {
             exec bash --init-file <(cat <<INITEOF
 source "$GENESIS_VENV/bin/activate"
 export ROS_DOMAIN_ID=42
-echo -e "${GREEN}[kratos]${NC} Genesis venv active. ROS_DOMAIN_ID=42"
-echo -e "${GREEN}[kratos]${NC} Run ${BOLD}python adapters/genesis_bridge.py${NC} to start the bridge."
+echo -e "${GREEN}[kratos-dev]${NC} Genesis venv active. ROS_DOMAIN_ID=42"
+echo -e "${GREEN}[kratos-dev]${NC} Run ${BOLD}python adapters/genesis_bridge.py${NC} to start the bridge."
 PS1='\[\033[0;35m\][kratos-genesis]\[\033[0m\] \w\$ '
 INITEOF
             )
@@ -195,8 +197,8 @@ cmd_shell() {
         [ -f /workspace/install/setup.bash ] && source /workspace/install/setup.bash
         export TURTLEBOT3_MODEL=waffle
         export HOME=/workspace
-        export PS1="\[\033[0;32m\][kratos]\[\033[0m\] \w\$ "
-        echo -e "\033[0;32m[kratos]\033[0m ROS2 sourced. You have sudo access (no password)."
+        export PS1="\[\033[0;32m\][kratos-dev]\[\033[0m\] \w\$ "
+        echo -e "\033[0;32m[kratos-dev]\033[0m ROS2 sourced. You have sudo access (no password)."
         exec bash --norc --noprofile
     '
 }
