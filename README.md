@@ -52,17 +52,12 @@ kratos start
 Everything is pre-installed and ready:
 
 ```bash
-# Launch TurtleBot3 in Gazebo
-ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 
 # Open RViz2 (in another terminal: kratos shell)
 rviz2
 
 # Teleop keyboard control
 ros2 run turtlebot3_teleop teleop_keyboard
-
-# Launch Nav2 navigation
-ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=true map:=/path/to/map.yaml
 
 # See all running topics
 ros2 topic list
